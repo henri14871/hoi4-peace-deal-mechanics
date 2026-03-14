@@ -1,0 +1,290 @@
+defined_text = { # state
+	name = pd_offer_peace_deal_loc
+
+	text = {
+		trigger = {
+			pd_is_marked = yes
+		}
+		localization_key = "pd_offer_peace_deal_marked_entry"
+	}
+	
+	text = {
+		trigger = {
+			pd_is_invisible = yes
+		}
+		localization_key = ""
+	}
+	
+	text = {
+		localization_key = "pd_offer_peace_deal_entry"
+	}
+}
+
+defined_text = { 
+	name = pd_ai_will_accept
+
+	text = {
+		trigger = {
+			is_ai = no
+		}
+		localization_key = pd_ai_will_accept_human
+	}
+
+	text = {
+		trigger = {
+			NOT = { pd_peace_deal_participants_valid = yes }
+		}
+		localization_key = pd_ai_will_accept_cannot
+	}
+
+	text = {
+		trigger = {
+			NOT = { pd_peace_deal_proposal_is_legal = yes }
+		}
+		localization_key = pd_ai_will_accept_cannot
+	}
+
+	text = {
+		trigger = {
+			NOT = { pd_peace_deal_has_terms = yes }
+		}
+		localization_key = pd_ai_will_accept_cannot
+	}
+
+	text = {
+		trigger = {
+			pd_ai_acceptance_likely = yes
+			pd_ai_acceptance_returns_valued_land = yes
+		}
+		localization_key = pd_ai_will_accept_yes_concessions
+	}
+
+	text = {
+		trigger = {
+			pd_ai_acceptance_likely = yes
+			pd_ai_acceptance_heavy_pressure = yes
+		}
+		localization_key = pd_ai_will_accept_yes_pressure
+	}
+
+	text = {
+		trigger = {
+			pd_ai_acceptance_likely = yes
+		}
+		localization_key = pd_ai_will_accept_yes
+	}
+
+	text = {
+		trigger = {
+			pd_ai_acceptance_pressured = yes
+			pd_ai_acceptance_has_punitive_terms = yes
+		}
+		localization_key = pd_ai_will_accept_maybe_punitive
+	}
+
+	text = {
+		trigger = {
+			pd_ai_acceptance_pressured = yes
+			pd_ai_acceptance_demands_valued_land = yes
+		}
+		localization_key = pd_ai_will_accept_maybe_land
+	}
+
+	text = {
+		trigger = {
+			pd_ai_acceptance_pressured = yes
+		}
+		localization_key = pd_ai_will_accept_maybe
+	}
+
+	text = {
+		trigger = {
+			pd_ai_acceptance_has_punitive_terms = yes
+		}
+		localization_key = pd_ai_will_accept_no_punitive
+	}
+
+	text = {
+		trigger = {
+			pd_ai_acceptance_demands_valued_land = yes
+		}
+		localization_key = pd_ai_will_accept_no_land
+	}
+	
+	text = {
+		localization_key = pd_ai_will_accept_no
+	}
+}
+
+defined_text = { 
+	name = pd_description_loc
+
+	text = {
+		trigger = {
+			ROOT = { has_country_flag = pd_root_gives }
+		}
+		localization_key = pd_description_root_gives
+	}
+	
+	text = {
+		localization_key = pd_description_root_takes
+	}
+}
+
+defined_text = { 
+	name = pd_war_reparations_loc
+
+	text = {
+		trigger = {
+			ROOT = { has_country_flag = pd_root_gives }
+		}
+		localization_key = pd_war_reparations_root_pays
+	}
+	
+	text = {
+		localization_key = pd_war_reparations_root_gets
+	}
+}
+
+defined_text = { 
+	name = pd_disarm_loc
+
+	text = {
+		trigger = {
+			ROOT = { has_country_flag = pd_root_gives }
+		}
+		localization_key = pd_disarm_root
+	}
+	
+	text = {
+		localization_key = pd_disarm_this
+	}
+}
+
+defined_text = { 
+	name = pd_take_loc
+
+	text = {
+		trigger = {
+			ROOT = { has_country_flag = pd_root_gives }
+		}
+		localization_key = pd_give_state
+	}
+	
+	text = {
+		localization_key = pd_take_state
+	}
+}
+
+defined_text = { 
+	name = pd_receive_take_loc
+
+	text = {
+		trigger = {
+			ROOT = { has_country_flag = pd_root_gives }
+		}
+		localization_key = pd_receive_take_good
+	}
+	
+	text = {
+		localization_key = pd_receive_take_bad
+	}
+}
+
+defined_text = { 
+	name = pd_receive_puppet_loc
+
+	text = {
+		trigger = {
+			ROOT = { has_country_flag = pd_root_gives }
+		}
+		localization_key = pd_receive_puppet_good
+	}
+	
+	text = {
+		localization_key = pd_receive_puppet_bad
+	}
+}
+
+defined_text = { 
+	name = pd_receive_demilitarize_loc
+
+	text = {
+		trigger = {
+			ROOT = { has_country_flag = pd_root_gives }
+		}
+		localization_key = pd_receive_demilitarize_good
+	}
+	
+	text = {
+		localization_key = pd_receive_demilitarize_bad
+	}
+}
+
+defined_text = { 
+	name = pd_receive_liberate_loc
+
+	text = {
+		trigger = {
+			ROOT = { has_country_flag = pd_root_gives }
+		}
+		localization_key = pd_receive_liberate_good
+	}
+	
+	text = {
+		localization_key = pd_receive_liberate_bad
+	}
+}
+
+defined_text = { 
+	name = pd_war_reparations_receive_loc
+
+	text = {
+		trigger = {
+			ROOT = { has_country_flag = pd_root_gives }
+		}
+		localization_key = pd_war_reparations_good
+	}
+	
+	text = {
+		localization_key = pd_war_reparations_bad
+	}
+}
+
+defined_text = { 
+	name = pd_disarm_receive_loc
+
+	text = {
+		trigger = {
+			ROOT = { has_country_flag = pd_root_gives }
+		}
+		localization_key = pd_disarm_good
+	}
+	
+	text = {
+		localization_key = pd_disarm_bad
+	}
+}
+
+defined_text = { 
+	name = pd_state_cost
+
+	text = {
+		trigger = {
+			pd_calculate_province_cost = yes
+		}
+		localization_key = pd_state_cost_value
+	}
+}
+
+defined_text = { 
+	name = pd_state_refund
+
+	text = {
+		trigger = {
+			pd_calculate_province_cost = yes
+			multiply_temp_variable = { pts = -1 }
+		}
+		localization_key = pd_state_refund_value
+	}
+}

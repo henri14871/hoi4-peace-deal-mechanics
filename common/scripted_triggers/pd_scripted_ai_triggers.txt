@@ -1,0 +1,1314 @@
+#	Example:
+# 
+#	example_trigger = {
+#		tag = GER
+#		is_ai = no
+#	}
+#
+#
+#	In a script file:
+#
+#	trigger = {
+#		exampel_trigger = yes
+#	}
+#
+
+pd_peace_deal_participants_valid = {
+	pd_has_peace_deal_relation = yes
+	ROOT = {
+		NOT = { civilwar_target = PREV }
+		NOT = { has_civil_war = yes }
+		NOT = { is_subject = yes }
+	}
+	NOT = { civilwar_target = ROOT }
+	NOT = { has_civil_war = yes }
+	is_subject = no
+
+	OR = {
+		pd_has_active_ceasefire_with_root = yes
+		AND = {
+			is_in_faction = yes
+			is_major = yes
+		}
+		is_in_faction = no
+	}
+}
+
+pd_peace_deal_can_initiate = {
+	pd_rule_ai_participates = yes
+	pd_peace_deal_participants_valid = yes
+	ROOT = {
+		NOT = { has_country_flag = pd_waiting_response }
+	}
+	NOT = { has_country_flag = pd_waiting_response }
+}
+
+pd_peace_deal_has_terms = {
+	OR = {
+		ROOT = { has_country_flag = pd_war_reparations }
+		ROOT = { has_country_flag = pd_disarm }
+		ROOT = {
+			NOT = {
+				all_of = {
+					array = pd_take_array
+					always = no
+				}
+			}
+		}
+		ROOT = {
+			NOT = {
+				all_of = {
+					array = pd_puppet_array
+					always = no
+				}
+			}
+		}
+		ROOT = {
+			NOT = {
+				all_of = {
+					array = pd_demilitarize_array
+					always = no
+				}
+			}
+		}
+		ROOT = {
+			NOT = {
+				all_of = {
+					array = pd_liberate_array
+					always = no
+				}
+			}
+		}
+	}
+}
+
+pd_peace_deal_proposal_is_legal = {
+	OR = {
+		check_variable = { ROOT.vp@THIS > ROOT.pd_total_cost }
+		check_variable = { ROOT.vp@THIS = ROOT.pd_total_cost }
+	}
+
+	ROOT = {
+		NOT = {
+			all_of = {
+				array = ROOT.owned_states
+
+				OR = {
+					is_in_array = {
+						array = pd_take_array
+						value = v
+					}
+					is_in_array = {
+						array = pd_puppet_array
+						value = v
+					}
+					is_in_array = {
+						array = pd_liberate_array
+						value = v
+					}
+				}
+			}
+		}
+	}
+}
+
+pd_ai_will_offer_peace = {
+	# root is the sender and this is receiver
+
+	pd_peace_deal_can_initiate = yes
+
+	# Receiver is weak enough for a demand deal.
+	set_temp_variable = { demand_score = -100 }
+
+	set_temp_variable = { sp = var:THIS.surrender_progress }
+	multiply_temp_variable = { sp = 200 }
+	round_temp_variable = sp
+	subtract_from_temp_variable = { sp = 100 }
+	clamp_temp_variable = {
+		var = sp
+		min = 0
+		max = 100
+	}
+	add_to_temp_variable = { demand_score = sp }
+
+	set_temp_variable = { ws = var:THIS.has_war_support }
+	multiply_temp_variable = { ws = -200 }
+	round_temp_variable = ws
+	add_to_temp_variable = { ws = 100 }
+	add_to_temp_variable = { demand_score = ws }
+
+	set_temp_variable = { s = var:THIS.has_stability }
+	multiply_temp_variable = { s = -200 }
+	round_temp_variable = s
+	add_to_temp_variable = { s = 100 }
+	add_to_temp_variable = { demand_score = s }
+
+	set_temp_variable = { rvp = ROOT.vp@THIS }
+	subtract_from_temp_variable = { rvp = THIS.vp@ROOT }
+	round_temp_variable = rvp
+	add_to_temp_variable = { demand_score = rvp }
+
+	set_temp_variable = { str = THIS.enemies_strength_ratio@ROOT }
+	multiply_temp_variable = { str = 100 }
+	round_temp_variable = str
+	subtract_from_temp_variable = { str = 100 }
+	clamp_temp_variable = {
+		var = str
+		max = 1000
+	}
+	add_to_temp_variable = { demand_score = str }
+
+	if = {
+		limit = {
+			is_major = yes
+		}
+		subtract_from_temp_variable = { demand_score = 100 }
+	}
+
+	if = {
+		limit = {
+			is_in_faction = yes
+		}
+		subtract_from_temp_variable = { demand_score = 200 }
+	}
+
+	set_temp_variable = { wt = global.threat }
+	multiply_temp_variable = { wt = -1000 }
+	round_temp_variable = wt
+	add_to_temp_variable = { wt = 200 }
+	clamp_temp_variable = {
+		var = wt
+		max = 0
+	}
+	add_to_temp_variable = { demand_score = wt }
+
+	# Sender is weak enough for a concession deal.
+	set_temp_variable = { offer_score = -100 }
+
+	set_temp_variable = { osp = var:ROOT.surrender_progress }
+	multiply_temp_variable = { osp = 200 }
+	round_temp_variable = osp
+	subtract_from_temp_variable = { osp = 100 }
+	clamp_temp_variable = {
+		var = osp
+		min = 0
+		max = 100
+	}
+	add_to_temp_variable = { offer_score = osp }
+
+	set_temp_variable = { ows = var:ROOT.has_war_support }
+	multiply_temp_variable = { ows = -200 }
+	round_temp_variable = ows
+	add_to_temp_variable = { ows = 100 }
+	add_to_temp_variable = { offer_score = ows }
+
+	set_temp_variable = { os = var:ROOT.has_stability }
+	multiply_temp_variable = { os = -200 }
+	round_temp_variable = os
+	add_to_temp_variable = { os = 100 }
+	add_to_temp_variable = { offer_score = os }
+
+	set_temp_variable = { orvp = THIS.vp@ROOT }
+	subtract_from_temp_variable = { orvp = ROOT.vp@THIS }
+	round_temp_variable = orvp
+	add_to_temp_variable = { offer_score = orvp }
+
+	set_temp_variable = { ostr = ROOT.enemies_strength_ratio@THIS }
+	multiply_temp_variable = { ostr = 100 }
+	round_temp_variable = ostr
+	subtract_from_temp_variable = { ostr = 100 }
+	clamp_temp_variable = {
+		var = ostr
+		max = 1000
+	}
+	add_to_temp_variable = { offer_score = ostr }
+
+	if = {
+		limit = {
+			ROOT = { is_major = yes }
+		}
+		subtract_from_temp_variable = { offer_score = 100 }
+	}
+
+	if = {
+		limit = {
+			ROOT = { is_in_faction = yes }
+		}
+		subtract_from_temp_variable = { offer_score = 200 }
+	}
+
+	set_temp_variable = { owt = global.threat }
+	multiply_temp_variable = { owt = -1000 }
+	round_temp_variable = owt
+	add_to_temp_variable = { owt = 200 }
+	clamp_temp_variable = {
+		var = owt
+		max = 0
+	}
+	add_to_temp_variable = { offer_score = owt }
+
+	OR = {
+		check_variable = { offer_score > 100 }
+		AND = {
+			check_variable = { demand_score > 125 }
+			check_variable = { ROOT.vp@THIS > 24 }
+		}
+	}
+}
+
+pd_ai_acceptance_has_punitive_terms = {
+	ROOT = { NOT = { has_country_flag = pd_root_gives } }
+	OR = {
+		ROOT = { has_country_flag = pd_war_reparations }
+		ROOT = { has_country_flag = pd_disarm }
+		ROOT = {
+			NOT = {
+				all_of = {
+					array = pd_puppet_array
+					always = no
+				}
+			}
+		}
+		ROOT = {
+			NOT = {
+				all_of = {
+					array = pd_demilitarize_array
+					always = no
+				}
+			}
+		}
+		ROOT = {
+			NOT = {
+				all_of = {
+					array = pd_liberate_array
+					always = no
+				}
+			}
+		}
+	}
+}
+
+pd_ai_acceptance_sender_conceding = {
+	ROOT = { has_country_flag = pd_root_gives }
+}
+
+pd_ai_acceptance_returns_valued_land = {
+	ROOT = { has_country_flag = pd_root_gives }
+	NOT = {
+		all_of = {
+			array = ROOT.pd_take_array
+			NOT = {
+				OR = {
+					is_core_of = PREV
+					is_claimed_by = PREV
+				}
+			}
+		}
+	}
+}
+
+pd_ai_acceptance_demands_valued_land = {
+	ROOT = { NOT = { has_country_flag = pd_root_gives } }
+	NOT = {
+		all_of = {
+			array = ROOT.pd_take_array
+			NOT = {
+				OR = {
+					AND = {
+						is_core_of = PREV
+						NOT = { is_core_of = ROOT }
+					}
+					AND = {
+						is_claimed_by = PREV
+						NOT = { is_claimed_by = ROOT }
+						NOT = { is_core_of = ROOT }
+					}
+				}
+			}
+		}
+	}
+}
+
+pd_ai_acceptance_heavy_pressure = {
+	pd_peace_deal_participants_valid = yes
+
+	set_temp_variable = { pressure_score = 0 }
+
+	set_temp_variable = { sp = var:THIS.surrender_progress }
+	multiply_temp_variable = { sp = 220 }
+	round_temp_variable = sp
+	subtract_from_temp_variable = { sp = 40 }
+	clamp_temp_variable = {
+		var = sp
+		min = 0
+		max = 180
+	}
+	add_to_temp_variable = { pressure_score = sp }
+
+	set_temp_variable = { ws = var:THIS.has_war_support }
+	multiply_temp_variable = { ws = -120 }
+	round_temp_variable = ws
+	add_to_temp_variable = { ws = 60 }
+	clamp_temp_variable = {
+		var = ws
+		min = -60
+		max = 60
+	}
+	add_to_temp_variable = { pressure_score = ws }
+
+	set_temp_variable = { s = var:THIS.has_stability }
+	multiply_temp_variable = { s = -120 }
+	round_temp_variable = s
+	add_to_temp_variable = { s = 60 }
+	clamp_temp_variable = {
+		var = s
+		min = -60
+		max = 60
+	}
+	add_to_temp_variable = { pressure_score = s }
+
+	set_temp_variable = { rvp = ROOT.vp@THIS }
+	subtract_from_temp_variable = { rvp = THIS.vp@ROOT }
+	round_temp_variable = rvp
+	clamp_temp_variable = {
+		var = rvp
+		min = -160
+		max = 160
+	}
+	add_to_temp_variable = { pressure_score = rvp }
+
+	set_temp_variable = { str = THIS.enemies_strength_ratio@ROOT }
+	multiply_temp_variable = { str = 140 }
+	round_temp_variable = str
+	subtract_from_temp_variable = { str = 140 }
+	clamp_temp_variable = {
+		var = str
+		min = -120
+		max = 160
+	}
+	add_to_temp_variable = { pressure_score = str }
+
+	set_temp_variable = { wt = global.threat }
+	multiply_temp_variable = { wt = -50 }
+	round_temp_variable = wt
+	clamp_temp_variable = {
+		var = wt
+		min = -50
+		max = 0
+	}
+	add_to_temp_variable = { pressure_score = wt }
+
+	check_variable = { pressure_score > 80 }
+}
+
+pd_ai_current_proposal_is_valid = {
+	pd_rule_ai_participates = yes
+	pd_peace_deal_participants_valid = yes
+	pd_peace_deal_proposal_is_legal = yes
+	pd_peace_deal_has_terms = yes
+
+	OR = {
+		is_ai = no
+		pd_ai_receiver_will_accept = yes
+	}
+}
+
+pd_ai_receiver_will_accept = {
+	pd_rule_ai_participates = yes
+	pd_peace_deal_participants_valid = yes
+	pd_peace_deal_proposal_is_legal = yes
+	pd_peace_deal_has_terms = yes
+
+	set_temp_variable = { acceptance_score = 0 }
+
+	# War pressure
+	set_temp_variable = { sp = var:THIS.surrender_progress }
+	multiply_temp_variable = { sp = 220 }
+	round_temp_variable = sp
+	subtract_from_temp_variable = { sp = 40 }
+	clamp_temp_variable = {
+		var = sp
+		min = 0
+		max = 180
+	}
+	add_to_temp_variable = { acceptance_score = sp }
+
+	set_temp_variable = { ws = var:THIS.has_war_support }
+	multiply_temp_variable = { ws = -120 }
+	round_temp_variable = ws
+	add_to_temp_variable = { ws = 60 }
+	clamp_temp_variable = {
+		var = ws
+		min = -60
+		max = 60
+	}
+	add_to_temp_variable = { acceptance_score = ws }
+
+	set_temp_variable = { s = var:THIS.has_stability }
+	multiply_temp_variable = { s = -120 }
+	round_temp_variable = s
+	add_to_temp_variable = { s = 60 }
+	clamp_temp_variable = {
+		var = s
+		min = -60
+		max = 60
+	}
+	add_to_temp_variable = { acceptance_score = s }
+
+	set_temp_variable = { rvp = ROOT.vp@THIS }
+	subtract_from_temp_variable = { rvp = THIS.vp@ROOT }
+	round_temp_variable = rvp
+	clamp_temp_variable = {
+		var = rvp
+		min = -160
+		max = 160
+	}
+	add_to_temp_variable = { acceptance_score = rvp }
+
+	set_temp_variable = { str = THIS.enemies_strength_ratio@ROOT }
+	multiply_temp_variable = { str = 140 }
+	round_temp_variable = str
+	subtract_from_temp_variable = { str = 140 }
+	clamp_temp_variable = {
+		var = str
+		min = -120
+		max = 160
+	}
+	add_to_temp_variable = { acceptance_score = str }
+
+	set_temp_variable = { wt = global.threat }
+	multiply_temp_variable = { wt = -50 }
+	round_temp_variable = wt
+	clamp_temp_variable = {
+		var = wt
+		min = -50
+		max = 0
+	}
+	add_to_temp_variable = { acceptance_score = wt }
+
+	# Proposal composition
+	if = {
+		limit = {
+			ROOT = { has_country_flag = pd_root_gives }
+		}
+		for_each_scope_loop = {
+			array = ROOT.pd_take_array
+			set_temp_variable = { term_pts = THIS.state_strategic_value }
+			round_temp_variable = term_pts
+			clamp_temp_variable = {
+				var = term_pts
+				min = 2
+				max = 20
+			}
+			if = {
+				limit = {
+					is_core_of = PREV
+				}
+				add_to_temp_variable = { term_pts = 26 }
+			}
+			else_if = {
+				limit = {
+					is_claimed_by = PREV
+				}
+				add_to_temp_variable = { term_pts = 14 }
+			}
+			else = {
+				set_temp_variable = { term_pts = 5 }
+			}
+			add_to_temp_variable = { acceptance_score = term_pts }
+		}
+
+		for_each_scope_loop = {
+			array = ROOT.pd_puppet_array
+			set_temp_variable = { term_pts = 4 }
+			add_to_temp_variable = { acceptance_score = term_pts }
+		}
+
+		for_each_scope_loop = {
+			array = ROOT.pd_liberate_array
+			set_temp_variable = { term_pts = 4 }
+			add_to_temp_variable = { acceptance_score = term_pts }
+		}
+
+		for_each_scope_loop = {
+			array = ROOT.pd_demilitarize_array
+			set_temp_variable = { term_pts = THIS.state_strategic_value }
+			round_temp_variable = term_pts
+			clamp_temp_variable = {
+				var = term_pts
+				min = 1
+				max = 8
+			}
+			divide_temp_variable = { term_pts = 2 }
+			round_temp_variable = term_pts
+			add_to_temp_variable = { term_pts = 2 }
+			add_to_temp_variable = { acceptance_score = term_pts }
+		}
+
+		if = {
+			limit = {
+				ROOT = { has_country_flag = pd_war_reparations }
+			}
+			add_to_temp_variable = { acceptance_score = 22 }
+		}
+
+		if = {
+			limit = {
+				ROOT = { has_country_flag = pd_disarm }
+			}
+			add_to_temp_variable = { acceptance_score = 34 }
+		}
+	}
+	else = {
+		for_each_scope_loop = {
+			array = ROOT.pd_take_array
+			set_temp_variable = { term_pts = THIS.state_strategic_value }
+			round_temp_variable = term_pts
+			clamp_temp_variable = {
+				var = term_pts
+				min = 2
+				max = 20
+			}
+			if = {
+				limit = {
+					is_core_of = PREV
+					NOT = { is_core_of = ROOT }
+				}
+				add_to_temp_variable = { term_pts = 45 }
+			}
+			else_if = {
+				limit = {
+					is_claimed_by = PREV
+					NOT = { is_claimed_by = ROOT }
+					NOT = { is_core_of = ROOT }
+				}
+				add_to_temp_variable = { term_pts = 24 }
+			}
+			else_if = {
+				limit = {
+					is_core_of = ROOT
+				}
+				set_temp_variable = { term_pts = 6 }
+				if = {
+					limit = {
+						is_core_of = PREV
+					}
+					add_to_temp_variable = { term_pts = 6 }
+				}
+			}
+			else_if = {
+				limit = {
+					is_claimed_by = ROOT
+				}
+				set_temp_variable = { term_pts = 7 }
+			}
+			else = {
+				divide_temp_variable = { term_pts = 2 }
+				round_temp_variable = term_pts
+				add_to_temp_variable = { term_pts = 12 }
+			}
+			subtract_from_temp_variable = { acceptance_score = term_pts }
+		}
+
+		for_each_scope_loop = {
+			array = ROOT.pd_liberate_array
+			set_temp_variable = { term_pts = THIS.state_strategic_value }
+			round_temp_variable = term_pts
+			clamp_temp_variable = {
+				var = term_pts
+				min = 1
+				max = 10
+			}
+			add_to_temp_variable = { term_pts = 10 }
+			subtract_from_temp_variable = { acceptance_score = term_pts }
+		}
+
+		for_each_scope_loop = {
+			array = ROOT.pd_puppet_array
+			set_temp_variable = { term_pts = THIS.state_strategic_value }
+			round_temp_variable = term_pts
+			clamp_temp_variable = {
+				var = term_pts
+				min = 2
+				max = 18
+			}
+			add_to_temp_variable = { term_pts = 28 }
+			subtract_from_temp_variable = { acceptance_score = term_pts }
+		}
+
+		for_each_scope_loop = {
+			array = ROOT.pd_demilitarize_array
+			set_temp_variable = { term_pts = THIS.state_strategic_value }
+			round_temp_variable = term_pts
+			clamp_temp_variable = {
+				var = term_pts
+				min = 1
+				max = 10
+			}
+			divide_temp_variable = { term_pts = 2 }
+			round_temp_variable = term_pts
+			add_to_temp_variable = { term_pts = 10 }
+			subtract_from_temp_variable = { acceptance_score = term_pts }
+		}
+
+		if = {
+			limit = {
+				ROOT = { has_country_flag = pd_war_reparations }
+			}
+			subtract_from_temp_variable = { acceptance_score = 20 }
+		}
+
+		if = {
+			limit = {
+				ROOT = { has_country_flag = pd_disarm }
+			}
+			subtract_from_temp_variable = { acceptance_score = 35 }
+		}
+	}
+
+	# Soft cost penalty
+	set_temp_variable = { cost_mod = ROOT.pd_total_cost }
+	divide_temp_variable = { cost_mod = 5 }
+	round_temp_variable = cost_mod
+	clamp_temp_variable = {
+		var = cost_mod
+		min = -20
+		max = 40
+	}
+	subtract_from_temp_variable = { acceptance_score = cost_mod }
+
+	# Geopolitical constraints
+	if = {
+		limit = {
+			is_major = yes
+		}
+		subtract_from_temp_variable = { acceptance_score = 25 }
+	}
+
+	if = {
+		limit = {
+			is_in_faction = yes
+		}
+		subtract_from_temp_variable = { acceptance_score = 15 }
+	}
+
+	if = {
+		limit = {
+			has_game_rule = {
+				rule = pd_ai_acceptance_stance
+				option = PD_AI_HARDLINE
+			}
+		}
+		subtract_from_temp_variable = { acceptance_score = 25 }
+	}
+
+	if = {
+		limit = {
+			has_game_rule = {
+				rule = pd_ai_acceptance_stance
+				option = PD_AI_CONCILIATORY
+			}
+		}
+		add_to_temp_variable = { acceptance_score = 25 }
+	}
+
+	check_variable = { acceptance_score > 0 }
+}
+
+pd_ai_acceptance_pressured = {
+	pd_rule_ai_participates = yes
+	pd_peace_deal_participants_valid = yes
+	pd_peace_deal_proposal_is_legal = yes
+	pd_peace_deal_has_terms = yes
+
+	set_temp_variable = { acceptance_score = 0 }
+
+	set_temp_variable = { sp = var:THIS.surrender_progress }
+	multiply_temp_variable = { sp = 220 }
+	round_temp_variable = sp
+	subtract_from_temp_variable = { sp = 40 }
+	clamp_temp_variable = {
+		var = sp
+		min = 0
+		max = 180
+	}
+	add_to_temp_variable = { acceptance_score = sp }
+
+	set_temp_variable = { ws = var:THIS.has_war_support }
+	multiply_temp_variable = { ws = -120 }
+	round_temp_variable = ws
+	add_to_temp_variable = { ws = 60 }
+	clamp_temp_variable = {
+		var = ws
+		min = -60
+		max = 60
+	}
+	add_to_temp_variable = { acceptance_score = ws }
+
+	set_temp_variable = { s = var:THIS.has_stability }
+	multiply_temp_variable = { s = -120 }
+	round_temp_variable = s
+	add_to_temp_variable = { s = 60 }
+	clamp_temp_variable = {
+		var = s
+		min = -60
+		max = 60
+	}
+	add_to_temp_variable = { acceptance_score = s }
+
+	set_temp_variable = { rvp = ROOT.vp@THIS }
+	subtract_from_temp_variable = { rvp = THIS.vp@ROOT }
+	round_temp_variable = rvp
+	clamp_temp_variable = {
+		var = rvp
+		min = -160
+		max = 160
+	}
+	add_to_temp_variable = { acceptance_score = rvp }
+
+	set_temp_variable = { str = THIS.enemies_strength_ratio@ROOT }
+	multiply_temp_variable = { str = 140 }
+	round_temp_variable = str
+	subtract_from_temp_variable = { str = 140 }
+	clamp_temp_variable = {
+		var = str
+		min = -120
+		max = 160
+	}
+	add_to_temp_variable = { acceptance_score = str }
+
+	set_temp_variable = { wt = global.threat }
+	multiply_temp_variable = { wt = -50 }
+	round_temp_variable = wt
+	clamp_temp_variable = {
+		var = wt
+		min = -50
+		max = 0
+	}
+	add_to_temp_variable = { acceptance_score = wt }
+
+	if = {
+		limit = {
+			ROOT = { has_country_flag = pd_root_gives }
+		}
+		for_each_scope_loop = {
+			array = ROOT.pd_take_array
+			set_temp_variable = { term_pts = THIS.state_strategic_value }
+			round_temp_variable = term_pts
+			clamp_temp_variable = {
+				var = term_pts
+				min = 2
+				max = 20
+			}
+			if = {
+				limit = {
+					is_core_of = PREV
+				}
+				add_to_temp_variable = { term_pts = 26 }
+			}
+			else_if = {
+				limit = {
+					is_claimed_by = PREV
+				}
+				add_to_temp_variable = { term_pts = 14 }
+			}
+			else = {
+				set_temp_variable = { term_pts = 5 }
+			}
+			add_to_temp_variable = { acceptance_score = term_pts }
+		}
+
+		for_each_scope_loop = {
+			array = ROOT.pd_puppet_array
+			add_to_temp_variable = { acceptance_score = 4 }
+		}
+
+		for_each_scope_loop = {
+			array = ROOT.pd_liberate_array
+			add_to_temp_variable = { acceptance_score = 4 }
+		}
+
+		for_each_scope_loop = {
+			array = ROOT.pd_demilitarize_array
+			set_temp_variable = { term_pts = THIS.state_strategic_value }
+			round_temp_variable = term_pts
+			clamp_temp_variable = {
+				var = term_pts
+				min = 1
+				max = 8
+			}
+			divide_temp_variable = { term_pts = 2 }
+			round_temp_variable = term_pts
+			add_to_temp_variable = { term_pts = 2 }
+			add_to_temp_variable = { acceptance_score = term_pts }
+		}
+
+		if = {
+			limit = {
+				ROOT = { has_country_flag = pd_war_reparations }
+			}
+			add_to_temp_variable = { acceptance_score = 22 }
+		}
+
+		if = {
+			limit = {
+				ROOT = { has_country_flag = pd_disarm }
+			}
+			add_to_temp_variable = { acceptance_score = 34 }
+		}
+	}
+	else = {
+		for_each_scope_loop = {
+			array = ROOT.pd_take_array
+			set_temp_variable = { term_pts = THIS.state_strategic_value }
+			round_temp_variable = term_pts
+			clamp_temp_variable = {
+				var = term_pts
+				min = 2
+				max = 20
+			}
+			if = {
+				limit = {
+					is_core_of = PREV
+					NOT = { is_core_of = ROOT }
+				}
+				add_to_temp_variable = { term_pts = 45 }
+			}
+			else_if = {
+				limit = {
+					is_claimed_by = PREV
+					NOT = { is_claimed_by = ROOT }
+					NOT = { is_core_of = ROOT }
+				}
+				add_to_temp_variable = { term_pts = 24 }
+			}
+			else_if = {
+				limit = {
+					is_core_of = ROOT
+				}
+				set_temp_variable = { term_pts = 6 }
+				if = {
+					limit = {
+						is_core_of = PREV
+					}
+					add_to_temp_variable = { term_pts = 6 }
+				}
+			}
+			else_if = {
+				limit = {
+					is_claimed_by = ROOT
+				}
+				set_temp_variable = { term_pts = 7 }
+			}
+			else = {
+				divide_temp_variable = { term_pts = 2 }
+				round_temp_variable = term_pts
+				add_to_temp_variable = { term_pts = 12 }
+			}
+			subtract_from_temp_variable = { acceptance_score = term_pts }
+		}
+
+		for_each_scope_loop = {
+			array = ROOT.pd_liberate_array
+			set_temp_variable = { term_pts = THIS.state_strategic_value }
+			round_temp_variable = term_pts
+			clamp_temp_variable = {
+				var = term_pts
+				min = 1
+				max = 10
+			}
+			add_to_temp_variable = { term_pts = 10 }
+			subtract_from_temp_variable = { acceptance_score = term_pts }
+		}
+
+		for_each_scope_loop = {
+			array = ROOT.pd_puppet_array
+			set_temp_variable = { term_pts = THIS.state_strategic_value }
+			round_temp_variable = term_pts
+			clamp_temp_variable = {
+				var = term_pts
+				min = 2
+				max = 18
+			}
+			add_to_temp_variable = { term_pts = 28 }
+			subtract_from_temp_variable = { acceptance_score = term_pts }
+		}
+
+		for_each_scope_loop = {
+			array = ROOT.pd_demilitarize_array
+			set_temp_variable = { term_pts = THIS.state_strategic_value }
+			round_temp_variable = term_pts
+			clamp_temp_variable = {
+				var = term_pts
+				min = 1
+				max = 10
+			}
+			divide_temp_variable = { term_pts = 2 }
+			round_temp_variable = term_pts
+			add_to_temp_variable = { term_pts = 10 }
+			subtract_from_temp_variable = { acceptance_score = term_pts }
+		}
+
+		if = {
+			limit = {
+				ROOT = { has_country_flag = pd_war_reparations }
+			}
+			subtract_from_temp_variable = { acceptance_score = 20 }
+		}
+
+		if = {
+			limit = {
+				ROOT = { has_country_flag = pd_disarm }
+			}
+			subtract_from_temp_variable = { acceptance_score = 35 }
+		}
+	}
+
+	set_temp_variable = { cost_mod = ROOT.pd_total_cost }
+	divide_temp_variable = { cost_mod = 5 }
+	round_temp_variable = cost_mod
+	clamp_temp_variable = {
+		var = cost_mod
+		min = -20
+		max = 40
+	}
+	subtract_from_temp_variable = { acceptance_score = cost_mod }
+
+	if = {
+		limit = {
+			is_major = yes
+		}
+		subtract_from_temp_variable = { acceptance_score = 25 }
+	}
+
+	if = {
+		limit = {
+			is_in_faction = yes
+		}
+		subtract_from_temp_variable = { acceptance_score = 15 }
+	}
+
+	if = {
+		limit = {
+			has_game_rule = {
+				rule = pd_ai_acceptance_stance
+				option = PD_AI_HARDLINE
+			}
+		}
+		subtract_from_temp_variable = { acceptance_score = 25 }
+	}
+
+	if = {
+		limit = {
+			has_game_rule = {
+				rule = pd_ai_acceptance_stance
+				option = PD_AI_CONCILIATORY
+			}
+		}
+		add_to_temp_variable = { acceptance_score = 25 }
+	}
+
+	check_variable = { acceptance_score > 0 }
+	NOT = { check_variable = { acceptance_score > 50 } }
+}
+
+pd_ai_acceptance_likely = {
+	pd_rule_ai_participates = yes
+	pd_peace_deal_participants_valid = yes
+	pd_peace_deal_proposal_is_legal = yes
+	pd_peace_deal_has_terms = yes
+	pd_ai_receiver_will_accept = yes
+
+	set_temp_variable = { acceptance_score = 0 }
+
+	set_temp_variable = { sp = var:THIS.surrender_progress }
+	multiply_temp_variable = { sp = 220 }
+	round_temp_variable = sp
+	subtract_from_temp_variable = { sp = 40 }
+	clamp_temp_variable = {
+		var = sp
+		min = 0
+		max = 180
+	}
+	add_to_temp_variable = { acceptance_score = sp }
+
+	set_temp_variable = { ws = var:THIS.has_war_support }
+	multiply_temp_variable = { ws = -120 }
+	round_temp_variable = ws
+	add_to_temp_variable = { ws = 60 }
+	clamp_temp_variable = {
+		var = ws
+		min = -60
+		max = 60
+	}
+	add_to_temp_variable = { acceptance_score = ws }
+
+	set_temp_variable = { s = var:THIS.has_stability }
+	multiply_temp_variable = { s = -120 }
+	round_temp_variable = s
+	add_to_temp_variable = { s = 60 }
+	clamp_temp_variable = {
+		var = s
+		min = -60
+		max = 60
+	}
+	add_to_temp_variable = { acceptance_score = s }
+
+	set_temp_variable = { rvp = ROOT.vp@THIS }
+	subtract_from_temp_variable = { rvp = THIS.vp@ROOT }
+	round_temp_variable = rvp
+	clamp_temp_variable = {
+		var = rvp
+		min = -160
+		max = 160
+	}
+	add_to_temp_variable = { acceptance_score = rvp }
+
+	set_temp_variable = { str = THIS.enemies_strength_ratio@ROOT }
+	multiply_temp_variable = { str = 140 }
+	round_temp_variable = str
+	subtract_from_temp_variable = { str = 140 }
+	clamp_temp_variable = {
+		var = str
+		min = -120
+		max = 160
+	}
+	add_to_temp_variable = { acceptance_score = str }
+
+	set_temp_variable = { wt = global.threat }
+	multiply_temp_variable = { wt = -50 }
+	round_temp_variable = wt
+	clamp_temp_variable = {
+		var = wt
+		min = -50
+		max = 0
+	}
+	add_to_temp_variable = { acceptance_score = wt }
+
+	if = {
+		limit = {
+			ROOT = { has_country_flag = pd_root_gives }
+		}
+		for_each_scope_loop = {
+			array = ROOT.pd_take_array
+			set_temp_variable = { term_pts = THIS.state_strategic_value }
+			round_temp_variable = term_pts
+			clamp_temp_variable = {
+				var = term_pts
+				min = 2
+				max = 20
+			}
+			if = {
+				limit = {
+					is_core_of = PREV
+				}
+				add_to_temp_variable = { term_pts = 26 }
+			}
+			else_if = {
+				limit = {
+					is_claimed_by = PREV
+				}
+				add_to_temp_variable = { term_pts = 14 }
+			}
+			else = {
+				set_temp_variable = { term_pts = 5 }
+			}
+			add_to_temp_variable = { acceptance_score = term_pts }
+		}
+
+		for_each_scope_loop = {
+			array = ROOT.pd_puppet_array
+			add_to_temp_variable = { acceptance_score = 4 }
+		}
+
+		for_each_scope_loop = {
+			array = ROOT.pd_liberate_array
+			add_to_temp_variable = { acceptance_score = 4 }
+		}
+
+		for_each_scope_loop = {
+			array = ROOT.pd_demilitarize_array
+			set_temp_variable = { term_pts = THIS.state_strategic_value }
+			round_temp_variable = term_pts
+			clamp_temp_variable = {
+				var = term_pts
+				min = 1
+				max = 8
+			}
+			divide_temp_variable = { term_pts = 2 }
+			round_temp_variable = term_pts
+			add_to_temp_variable = { term_pts = 2 }
+			add_to_temp_variable = { acceptance_score = term_pts }
+		}
+
+		if = {
+			limit = {
+				ROOT = { has_country_flag = pd_war_reparations }
+			}
+			add_to_temp_variable = { acceptance_score = 22 }
+		}
+
+		if = {
+			limit = {
+				ROOT = { has_country_flag = pd_disarm }
+			}
+			add_to_temp_variable = { acceptance_score = 34 }
+		}
+	}
+	else = {
+		for_each_scope_loop = {
+			array = ROOT.pd_take_array
+			set_temp_variable = { term_pts = THIS.state_strategic_value }
+			round_temp_variable = term_pts
+			clamp_temp_variable = {
+				var = term_pts
+				min = 2
+				max = 20
+			}
+			if = {
+				limit = {
+					is_core_of = PREV
+					NOT = { is_core_of = ROOT }
+				}
+				add_to_temp_variable = { term_pts = 45 }
+			}
+			else_if = {
+				limit = {
+					is_claimed_by = PREV
+					NOT = { is_claimed_by = ROOT }
+					NOT = { is_core_of = ROOT }
+				}
+				add_to_temp_variable = { term_pts = 24 }
+			}
+			else_if = {
+				limit = {
+					is_core_of = ROOT
+				}
+				set_temp_variable = { term_pts = 6 }
+				if = {
+					limit = {
+						is_core_of = PREV
+					}
+					add_to_temp_variable = { term_pts = 6 }
+				}
+			}
+			else_if = {
+				limit = {
+					is_claimed_by = ROOT
+				}
+				set_temp_variable = { term_pts = 7 }
+			}
+			else = {
+				divide_temp_variable = { term_pts = 2 }
+				round_temp_variable = term_pts
+				add_to_temp_variable = { term_pts = 12 }
+			}
+			subtract_from_temp_variable = { acceptance_score = term_pts }
+		}
+
+		for_each_scope_loop = {
+			array = ROOT.pd_liberate_array
+			set_temp_variable = { term_pts = THIS.state_strategic_value }
+			round_temp_variable = term_pts
+			clamp_temp_variable = {
+				var = term_pts
+				min = 1
+				max = 10
+			}
+			add_to_temp_variable = { term_pts = 10 }
+			subtract_from_temp_variable = { acceptance_score = term_pts }
+		}
+
+		for_each_scope_loop = {
+			array = ROOT.pd_puppet_array
+			set_temp_variable = { term_pts = THIS.state_strategic_value }
+			round_temp_variable = term_pts
+			clamp_temp_variable = {
+				var = term_pts
+				min = 2
+				max = 18
+			}
+			add_to_temp_variable = { term_pts = 28 }
+			subtract_from_temp_variable = { acceptance_score = term_pts }
+		}
+
+		for_each_scope_loop = {
+			array = ROOT.pd_demilitarize_array
+			set_temp_variable = { term_pts = THIS.state_strategic_value }
+			round_temp_variable = term_pts
+			clamp_temp_variable = {
+				var = term_pts
+				min = 1
+				max = 10
+			}
+			divide_temp_variable = { term_pts = 2 }
+			round_temp_variable = term_pts
+			add_to_temp_variable = { term_pts = 10 }
+			subtract_from_temp_variable = { acceptance_score = term_pts }
+		}
+
+		if = {
+			limit = {
+				ROOT = { has_country_flag = pd_war_reparations }
+			}
+			subtract_from_temp_variable = { acceptance_score = 20 }
+		}
+
+		if = {
+			limit = {
+				ROOT = { has_country_flag = pd_disarm }
+			}
+			subtract_from_temp_variable = { acceptance_score = 35 }
+		}
+	}
+
+	set_temp_variable = { cost_mod = ROOT.pd_total_cost }
+	divide_temp_variable = { cost_mod = 5 }
+	round_temp_variable = cost_mod
+	clamp_temp_variable = {
+		var = cost_mod
+		min = -20
+		max = 40
+	}
+	subtract_from_temp_variable = { acceptance_score = cost_mod }
+
+	if = {
+		limit = {
+			is_major = yes
+		}
+		subtract_from_temp_variable = { acceptance_score = 25 }
+	}
+
+	if = {
+		limit = {
+			is_in_faction = yes
+		}
+		subtract_from_temp_variable = { acceptance_score = 15 }
+	}
+
+	if = {
+		limit = {
+			has_game_rule = {
+				rule = pd_ai_acceptance_stance
+				option = PD_AI_HARDLINE
+			}
+		}
+		subtract_from_temp_variable = { acceptance_score = 25 }
+	}
+
+	if = {
+		limit = {
+			has_game_rule = {
+				rule = pd_ai_acceptance_stance
+				option = PD_AI_CONCILIATORY
+			}
+		}
+		add_to_temp_variable = { acceptance_score = 25 }
+	}
+
+	check_variable = { acceptance_score > 50 }
+}
+
+pd_ai_will_accept = {
+	pd_ai_receiver_will_accept = yes
+}

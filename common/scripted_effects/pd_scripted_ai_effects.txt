@@ -1,0 +1,574 @@
+#	Example:
+# 
+#	example_effect = {
+#		add_political_power = 66
+#		add_popularity = {
+#			ideology = fascism
+#			popularity = 0.33
+#		}
+#	}
+#
+#
+#	In a script file:
+#
+#	effect = {
+#		example_effect = yes
+#	}
+#
+
+#### Helper functions
+
+pd_ai_clear_peace_intent = {
+	ROOT = {
+		clr_country_flag = pd_ai_want_peace
+		clear_variable = pd_ai_want_peace_with
+		clr_country_flag = pd_root_gives
+	}
+	reset_peace_deal_proposal = yes
+}
+
+pd_ai_calculate_peace_scores = {
+	# root is the sender and this is receiver
+
+	# Receiver is weak enough for a demand deal.
+	set_temp_variable = { demand_score = -100 }
+
+	set_temp_variable = { sp = var:THIS.surrender_progress }
+	multiply_temp_variable = { sp = 200 }
+	round_temp_variable = sp
+	subtract_from_temp_variable = { sp = 100 }
+	clamp_temp_variable = {
+		var = sp
+		min = 0
+		max = 100
+	}
+	add_to_temp_variable = { demand_score = sp }
+
+	set_temp_variable = { ws = var:THIS.has_war_support }
+	multiply_temp_variable = { ws = -200 }
+	round_temp_variable = ws
+	add_to_temp_variable = { ws = 100 }
+	add_to_temp_variable = { demand_score = ws }
+
+	set_temp_variable = { s = var:THIS.has_stability }
+	multiply_temp_variable = { s = -200 }
+	round_temp_variable = s
+	add_to_temp_variable = { s = 100 }
+	add_to_temp_variable = { demand_score = s }
+
+	set_temp_variable = { rvp = ROOT.vp@THIS }
+	subtract_from_temp_variable = { rvp = THIS.vp@ROOT }
+	round_temp_variable = rvp
+	add_to_temp_variable = { demand_score = rvp }
+
+	set_temp_variable = { str = THIS.enemies_strength_ratio@ROOT }
+	multiply_temp_variable = { str = 100 }
+	round_temp_variable = str
+	subtract_from_temp_variable = { str = 100 }
+	clamp_temp_variable = {
+		var = str
+		max = 1000
+	}
+	add_to_temp_variable = { demand_score = str }
+
+	if = {
+		limit = {
+			is_major = yes
+		}
+		subtract_from_temp_variable = { demand_score = 100 }
+	}
+
+	if = {
+		limit = {
+			is_in_faction = yes
+		}
+		subtract_from_temp_variable = { demand_score = 200 }
+	}
+
+	set_temp_variable = { wt = global.threat }
+	multiply_temp_variable = { wt = -1000 }
+	round_temp_variable = wt
+	add_to_temp_variable = { wt = 200 }
+	clamp_temp_variable = {
+		var = wt
+		max = 0
+	}
+	add_to_temp_variable = { demand_score = wt }
+
+	# Sender is weak enough for a concession deal.
+	set_temp_variable = { offer_score = -100 }
+
+	set_temp_variable = { osp = var:ROOT.surrender_progress }
+	multiply_temp_variable = { osp = 200 }
+	round_temp_variable = osp
+	subtract_from_temp_variable = { osp = 100 }
+	clamp_temp_variable = {
+		var = osp
+		min = 0
+		max = 100
+	}
+	add_to_temp_variable = { offer_score = osp }
+
+	set_temp_variable = { ows = var:ROOT.has_war_support }
+	multiply_temp_variable = { ows = -200 }
+	round_temp_variable = ows
+	add_to_temp_variable = { ows = 100 }
+	add_to_temp_variable = { offer_score = ows }
+
+	set_temp_variable = { os = var:ROOT.has_stability }
+	multiply_temp_variable = { os = -200 }
+	round_temp_variable = os
+	add_to_temp_variable = { os = 100 }
+	add_to_temp_variable = { offer_score = os }
+
+	set_temp_variable = { orvp = THIS.vp@ROOT }
+	subtract_from_temp_variable = { orvp = ROOT.vp@THIS }
+	round_temp_variable = orvp
+	add_to_temp_variable = { offer_score = orvp }
+
+	set_temp_variable = { ostr = ROOT.enemies_strength_ratio@THIS }
+	multiply_temp_variable = { ostr = 100 }
+	round_temp_variable = ostr
+	subtract_from_temp_variable = { ostr = 100 }
+	clamp_temp_variable = {
+		var = ostr
+		max = 1000
+	}
+	add_to_temp_variable = { offer_score = ostr }
+
+	if = {
+		limit = {
+			ROOT = { is_major = yes }
+		}
+		subtract_from_temp_variable = { offer_score = 100 }
+	}
+
+	if = {
+		limit = {
+			ROOT = { is_in_faction = yes }
+		}
+		subtract_from_temp_variable = { offer_score = 200 }
+	}
+
+	set_temp_variable = { owt = global.threat }
+	multiply_temp_variable = { owt = -1000 }
+	round_temp_variable = owt
+	add_to_temp_variable = { owt = 200 }
+	clamp_temp_variable = {
+		var = owt
+		max = 0
+	}
+	add_to_temp_variable = { offer_score = owt }
+
+	set_temp_variable = { demand_mode_valid = 0 }
+	if = {
+		limit = {
+			check_variable = { demand_score > 125 }
+			check_variable = { ROOT.vp@THIS > 24 }
+		}
+		set_temp_variable = { demand_mode_valid = 1 }
+	}
+
+	set_temp_variable = { offer_mode_valid = 0 }
+	if = {
+		limit = {
+			check_variable = { offer_score > 100 }
+		}
+		set_temp_variable = { offer_mode_valid = 1 }
+	}
+
+	set_temp_variable = { ai_target_priority = -1 }
+	if = {
+		limit = {
+			check_variable = { demand_mode_valid = 1 }
+		}
+		set_temp_variable = { ai_target_priority = demand_score }
+	}
+	else_if = {
+		limit = {
+			check_variable = { offer_mode_valid = 1 }
+		}
+		set_temp_variable = { ai_target_priority = offer_score }
+	}
+}
+
+pd_ai_will_take = {
+	set_variable = { ROOT.pd_selected = 1 }
+	add_state_to_list = yes
+}
+
+pd_ai_will_puppet = {
+	set_variable = { ROOT.pd_selected = 2 }
+	add_state_to_list = yes
+}
+
+pd_ai_will_demilitarize = {
+	set_variable = { ROOT.pd_selected = 3 }
+	add_state_to_list = yes
+}
+
+pd_ai_will_liberate = {
+	set_variable = { ROOT.pd_selected = 4 }
+	add_state_to_list = yes
+}
+
+pd_ai_try_take_current_state = {
+	set_temp_variable = { candidate_state = THIS }
+	pd_ai_will_take = yes
+
+	var:peace_target = {
+		if = {
+			limit = {
+				NOT = { pd_ai_current_proposal_is_valid = yes }
+			}
+			var:candidate_state = {
+				remove_state_from_list = yes
+			}
+		}
+	}
+}
+
+pd_ai_try_liberate_current_state = {
+	set_temp_variable = { candidate_state = THIS }
+	pd_ai_will_liberate = yes
+
+	var:peace_target = {
+		if = {
+			limit = {
+				NOT = { pd_ai_current_proposal_is_valid = yes }
+			}
+			var:candidate_state = {
+				remove_state_from_list = yes
+			}
+		}
+	}
+}
+
+pd_ai_try_puppet_current_state = {
+	set_temp_variable = { candidate_state = THIS }
+	pd_ai_will_puppet = yes
+
+	var:peace_target = {
+		if = {
+			limit = {
+				NOT = { pd_ai_current_proposal_is_valid = yes }
+			}
+			var:candidate_state = {
+				remove_state_from_list = yes
+			}
+		}
+	}
+}
+
+pd_ai_enable_war_reparations = {
+	ROOT = { set_country_flag = pd_war_reparations }
+	if = {
+		limit = {
+			ROOT = { has_country_flag = pd_root_gives }
+		}
+		subtract_from_variable = { ROOT.pd_total_cost = ROOT.pd_wr_cost }
+	}
+	else = {
+		add_to_variable = { ROOT.pd_total_cost = ROOT.pd_wr_cost }
+	}
+}
+
+pd_ai_disable_war_reparations = {
+	ROOT = { clr_country_flag = pd_war_reparations }
+	if = {
+		limit = {
+			ROOT = { has_country_flag = pd_root_gives }
+		}
+		add_to_variable = { ROOT.pd_total_cost = ROOT.pd_wr_cost }
+	}
+	else = {
+		subtract_from_variable = { ROOT.pd_total_cost = ROOT.pd_wr_cost }
+	}
+}
+
+pd_ai_try_war_reparations = {
+	if = {
+		limit = {
+			ROOT = { NOT = { has_country_flag = pd_war_reparations } }
+			OR = {
+				AND = {
+					ROOT = {
+						has_country_flag = pd_root_gives
+						check_variable = { wr_payments < 2 }
+					}
+				}
+				AND = {
+					ROOT = { NOT = { has_country_flag = pd_root_gives } }
+					check_variable = { wr_payments < 2 }
+				}
+			}
+		}
+		pd_ai_enable_war_reparations = yes
+		if = {
+			limit = {
+				NOT = { pd_ai_current_proposal_is_valid = yes }
+			}
+			pd_ai_disable_war_reparations = yes
+		}
+	}
+}
+
+pd_ai_enable_disarm = {
+	ROOT = { set_country_flag = pd_disarm }
+	if = {
+		limit = {
+			ROOT = { has_country_flag = pd_root_gives }
+		}
+		subtract_from_variable = { ROOT.pd_total_cost = ROOT.pd_disarm_cost }
+	}
+	else = {
+		add_to_variable = { ROOT.pd_total_cost = ROOT.pd_disarm_cost }
+	}
+}
+
+pd_ai_disable_disarm = {
+	ROOT = { clr_country_flag = pd_disarm }
+	if = {
+		limit = {
+			ROOT = { has_country_flag = pd_root_gives }
+		}
+		add_to_variable = { ROOT.pd_total_cost = ROOT.pd_disarm_cost }
+	}
+	else = {
+		subtract_from_variable = { ROOT.pd_total_cost = ROOT.pd_disarm_cost }
+	}
+}
+
+pd_ai_try_disarm = {
+	if = {
+		limit = {
+			ROOT = { NOT = { has_country_flag = pd_disarm } }
+		}
+		pd_ai_enable_disarm = yes
+		if = {
+			limit = {
+				NOT = { pd_ai_current_proposal_is_valid = yes }
+			}
+			pd_ai_disable_disarm = yes
+		}
+	}
+}
+
+####
+
+pd_ai_prepare_peace_deal = {
+	# root is the sender and this is receiver
+
+	if = {
+		limit = {
+			NOT = { pd_peace_deal_can_initiate = yes }
+		}
+		pd_ai_clear_peace_intent = yes
+	}
+	else = {
+		set_temp_variable = { peace_target = THIS }
+		pd_ai_calculate_peace_scores = yes
+
+		if = {
+			limit = {
+				NOT = {
+					OR = {
+						check_variable = { demand_mode_valid = 1 }
+						check_variable = { offer_mode_valid = 1 }
+					}
+				}
+			}
+			pd_ai_clear_peace_intent = yes
+		}
+		else = {
+			set_temp_variable = { concession_mode = 0 }
+			if = {
+				limit = {
+					check_variable = { demand_mode_valid = 1 }
+				}
+				ROOT = { clr_country_flag = pd_root_gives }
+			}
+			else = {
+				set_temp_variable = { concession_mode = 1 }
+				ROOT = { set_country_flag = pd_root_gives }
+			}
+
+			reset_peace_deal_proposal = yes
+
+			if = {
+				limit = {
+					check_variable = { concession_mode = 1 }
+				}
+				for_each_scope_loop = {
+					array = ROOT.pd_state_list
+					if = {
+						limit = {
+							is_core_of = var:peace_target
+						}
+						pd_ai_try_take_current_state = yes
+					}
+				}
+
+				for_each_scope_loop = {
+					array = ROOT.pd_state_list
+					if = {
+						limit = {
+							is_claimed_by = var:peace_target
+							ROOT = {
+								NOT = {
+									is_in_array = {
+										array = pd_take_array
+										value = PREV
+									}
+								}
+							}
+						}
+						pd_ai_try_take_current_state = yes
+					}
+				}
+
+				for_each_scope_loop = {
+					array = ROOT.pd_state_list
+					if = {
+						limit = {
+							ROOT = {
+								NOT = {
+									is_in_array = {
+										array = pd_take_array
+										value = PREV
+									}
+								}
+								NOT = {
+									is_in_array = {
+										array = pd_liberate_array
+										value = PREV
+									}
+								}
+							}
+							any_of_scopes = {
+								array = THIS.core_countries
+								NOT = { original_tag = PREV.owner }
+								NOT = { tag = ROOT }
+							}
+						}
+						pd_ai_try_liberate_current_state = yes
+					}
+				}
+
+				var:peace_target = {
+					pd_ai_try_war_reparations = yes
+					pd_ai_try_disarm = yes
+				}
+			}
+			else = {
+				for_each_scope_loop = {
+					array = ROOT.pd_state_list
+					if = {
+						limit = {
+							is_core_of = ROOT
+						}
+						pd_ai_try_take_current_state = yes
+					}
+				}
+
+				for_each_scope_loop = {
+					array = ROOT.pd_state_list
+					if = {
+						limit = {
+							is_claimed_by = ROOT
+							ROOT = {
+								NOT = {
+									is_in_array = {
+										array = pd_take_array
+										value = PREV
+									}
+								}
+							}
+						}
+						pd_ai_try_take_current_state = yes
+					}
+				}
+
+				for_each_scope_loop = {
+					array = ROOT.pd_state_list
+					if = {
+						limit = {
+							ROOT = {
+								NOT = {
+									is_in_array = {
+										array = pd_take_array
+										value = PREV
+									}
+								}
+								NOT = {
+									is_in_array = {
+										array = pd_liberate_array
+										value = PREV
+									}
+								}
+							}
+							any_of_scopes = {
+								array = THIS.core_countries
+								NOT = { original_tag = PREV.owner }
+								NOT = { tag = ROOT }
+							}
+						}
+						pd_ai_try_liberate_current_state = yes
+					}
+				}
+
+				for_each_scope_loop = {
+					array = ROOT.pd_state_list
+					if = {
+						limit = {
+							var:peace_target = {
+								owns_state = PREV
+							}
+							NOT = { is_core_of = ROOT }
+							NOT = { is_claimed_by = ROOT }
+							ROOT = {
+								NOT = {
+									is_in_array = {
+										array = pd_take_array
+										value = PREV
+									}
+								}
+								NOT = {
+									is_in_array = {
+										array = pd_liberate_array
+										value = PREV
+									}
+								}
+								NOT = {
+									is_in_array = {
+										array = pd_puppet_array
+										value = PREV
+									}
+								}
+							}
+						}
+						pd_ai_try_puppet_current_state = yes
+					}
+				}
+
+				var:peace_target = {
+					pd_ai_try_war_reparations = yes
+					pd_ai_try_disarm = yes
+				}
+			}
+
+			if = {
+				limit = {
+					NOT = { pd_ai_current_proposal_is_valid = yes }
+				}
+				pd_ai_clear_peace_intent = yes
+			}
+			else_if = {
+				limit = {
+					NOT = { pd_peace_deal_has_terms = yes }
+				}
+				pd_ai_clear_peace_intent = yes
+			}
+		}
+	}
+}

@@ -1,0 +1,54 @@
+pd_system_mode = {
+	name = PD_RULE_SYSTEM_MODE
+	group = PD_RULE_GROUP
+	default = {
+		name = PD_SYSTEM_ENABLED
+		text = PD_RULE_ENABLED
+		desc = PD_RULE_SYSTEM_MODE_ENABLED_DESC
+	}
+	option = {
+		name = PD_SYSTEM_DISABLED
+		text = PD_RULE_DISABLED
+		desc = PD_RULE_SYSTEM_MODE_DISABLED_DESC
+	}
+}
+
+pd_ai_participation = {
+	name = PD_RULE_AI_PARTICIPATION
+	group = PD_RULE_GROUP
+	default = {
+		name = PD_AI_FULL
+		text = PD_RULE_AI_FULL
+		desc = PD_RULE_AI_FULL_DESC
+	}
+	option = {
+		name = PD_AI_PLAYER_INITIATED_ONLY
+		text = PD_RULE_AI_PLAYER_INITIATED_ONLY
+		desc = PD_RULE_AI_PLAYER_INITIATED_ONLY_DESC
+	}
+	option = {
+		name = PD_AI_HUMANS_ONLY
+		text = PD_RULE_AI_HUMANS_ONLY
+		desc = PD_RULE_AI_HUMANS_ONLY_DESC
+	}
+}
+
+pd_ai_acceptance_stance = {
+	name = PD_RULE_AI_ACCEPTANCE
+	group = PD_RULE_GROUP
+	default = {
+		name = PD_AI_STANDARD
+		text = PD_RULE_STANDARD
+		desc = PD_RULE_AI_ACCEPTANCE_STANDARD_DESC
+	}
+	option = {
+		name = PD_AI_HARDLINE
+		text = PD_RULE_HARDLINE
+		desc = PD_RULE_AI_ACCEPTANCE_HARDLINE_DESC
+	}
+	option = {
+		name = PD_AI_CONCILIATORY
+		text = PD_RULE_CONCILIATORY
+		desc = PD_RULE_AI_ACCEPTANCE_CONCILIATORY_DESC
+	}
+}

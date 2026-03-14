@@ -1,0 +1,30 @@
+[h1]Peace Deal Mechanics[/h1]
+
+Peace Deal Mechanics adds negotiated mid-war settlements to Hearts of Iron IV without waiting for total capitulation.
+
+[b]What it does:[/b] this mod adds a custom peace-deal diplomatic action that lets countries settle wars early through limited terms instead of always fighting to a full peace conference.
+
+[h2]Features[/h2]
+[list]
+[*] Mid-war peace deal diplomacy
+[*] Demand terms or offer a negotiated settlement
+[*] Take states, give states, puppet states, demilitarize, and liberate territory
+[*] Optional war reparations and forced disarmament
+[*] AI countries now use the system on their own with conservative target selection
+[*] AI can make narrow puppet demands in clear cases without bloating the system
+[*] Rebuilt AI acceptance so credible settlements are judged by pressure, terms, and political context
+[*] Three small game rules for system availability, AI participation, and AI acceptance stance
+[*] Vanilla conditional surrender is disabled while Peace Deal Mechanics is active
+[*] Optional Ceasefire Mechanics integration so active ceasefires can be turned into permanent peace cleanly
+[/list]
+
+[h2]How it plays[/h2]
+[list]
+[*] Winning countries can press for a limited settlement without waiting for total collapse
+[*] Losing countries can offer concessions to preserve part of their position
+[*] Accepted deals end the war immediately and apply a truce
+[/list]
+
+[b]Version:[/b] 1.0.0
+[b]HOI4:[/b] 1.17.4.1+
+[b]DLC Required:[/b] None

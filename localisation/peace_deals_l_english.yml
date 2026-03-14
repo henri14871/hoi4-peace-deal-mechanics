@@ -1,0 +1,108 @@
+﻿l_english:
+  # Countries Cosmetic
+  COUNTRY_subject:0 "$OVERLORDADJ$ $NONIDEOLOGY$"
+  COUNTRY_subject_DEF:0 "the $OVERLORDADJ$ $NONIDEOLOGY$"
+  COUNTRY_subject_ADJ:0 "$OVERLORDADJ$ $NONIDEOLOGYADJ$"
+  
+  # Ideas
+  war_reparations:0 "War Reparations"
+  war_reparations_desc:0 "This country is currently paying war reparations to [?war_reps_to.GetNameDef]"
+  conditional_surrender:0 "Negotiated Settlement"
+  
+  # Decisions
+  pd_pay_war_reparations:0 "Paying war reparations to [From.GetNameDef]"
+  
+  # Diplomatic actions
+  OFFER_PEACE_DEAL_TITLE:0 "Offer Peace Deal"  
+  OFFER_PEACE_DEAL_ACTION_DESC:0 "Negotiate a limited peace during an ongoing war or an active ceasefire. Demand territory, offer concessions, or impose punitive terms as long as the proposal stays within available war score."
+
+  # Game rules
+  PD_RULE_GROUP:0 "Peace Deal Mechanics"
+  PD_RULE_SYSTEM_MODE:0 "Peace Deal Mechanics: System"
+  PD_RULE_AI_PARTICIPATION:0 "Peace Deal Mechanics: AI Participation"
+  PD_RULE_AI_ACCEPTANCE:0 "Peace Deal Mechanics: AI Acceptance"
+  PD_RULE_ENABLED:0 "Enabled"
+  PD_RULE_DISABLED:0 "Disabled"
+  PD_RULE_STANDARD:0 "Standard"
+  PD_RULE_HARDLINE:0 "Hardline"
+  PD_RULE_CONCILIATORY:0 "Conciliatory"
+  PD_RULE_AI_FULL:0 "Full AI"
+  PD_RULE_AI_PLAYER_INITIATED_ONLY:0 "Player-Initiated Only"
+  PD_RULE_AI_HUMANS_ONLY:0 "Humans Only"
+  PD_RULE_SYSTEM_MODE_ENABLED_DESC:0 "Peace Deal Mechanics is fully available."
+  PD_RULE_SYSTEM_MODE_DISABLED_DESC:0 "Peace Deal Mechanics is fully disabled. Vanilla conditional surrender remains disabled as well."
+  PD_RULE_AI_FULL_DESC:0 "Players and AI countries can both use Peace Deal Mechanics."
+  PD_RULE_AI_PLAYER_INITIATED_ONLY_DESC:0 "Players can send peace deals to AI countries, but AI countries will not start peace offers on their own."
+  PD_RULE_AI_HUMANS_ONLY_DESC:0 "Only human countries can use Peace Deal Mechanics. AI countries neither initiate nor participate."
+  PD_RULE_AI_ACCEPTANCE_STANDARD_DESC:0 "AI judges peace deals using the standard Peace Deal Mechanics acceptance model."
+  PD_RULE_AI_ACCEPTANCE_HARDLINE_DESC:0 "AI is more reluctant to accept Peace Deal Mechanics offers."
+  PD_RULE_AI_ACCEPTANCE_CONCILIATORY_DESC:0 "AI is more willing to accept Peace Deal Mechanics offers."
+  
+  # Send peace offer gui
+  PD_TAKE_TAB:0 "Demand Terms"
+  PD_GIVE_TAB:0 "Offer Terms"
+  PD_PUPPET:0 "Create Puppet"
+  PD_DEMILITARIZE:0 "Demilitarize"
+  PD_LIBERATE:0 "Liberate / Return"
+  TOTAL_COST:0 "Total cost: [?Root.pd_total_cost|Y0] £victory_points"
+  
+  # Receive peace offer gui
+  PD_OFFER_PEACE_DEAL_RECEIVE:0 "§Y[Root.GetName]§! has offered §Y[This.GetName]§! this peace proposal:"
+  PD_STATE_LIST_ENTRY:0 "§Y[This.GetName]§!"
+  
+  # Scripted loc
+ 
+  pd_description_root_takes:0 "Build a demand proposal using your current war score. States, reparations, and disarmament spend score. Available war score against [Prev.GetName]: [?Root.vp@PREV|Y0] £victory_points"
+  pd_description_root_gives:0 "Build a concession proposal. States you offer reduce the total cost, but [Root.GetName] cannot give away every owned state."
+  
+  pd_take_state:0 "Take State"
+  pd_give_state:0 "Give State"  
+  
+  pd_war_reparations_root_gets:0 "Demand war reparations [?Root.pd_wr_cost|Y0] £victory_points"
+  pd_war_reparations_root_pays:0 "Pay war reparations §G-§![?Root.pd_wr_cost|G0] £victory_points"
+  
+  pd_disarm_this:0 "Disarm nation [?Root.pd_disarm_cost|Y0] £victory_points"
+  pd_disarm_root:0 "Submit to disarmament §G-§![?Root.pd_disarm_cost|G0] £victory_points"
+  
+  pd_state_cost_value:0 "[This.GetName] [This.Owner.GetFlag] [?pts|Y0] £victory_points"
+  pd_state_refund_value:0 "[This.GetName] [This.Owner.GetFlag] [?pts|G0] £victory_points"
+
+  pd_ai_will_accept_cannot:0 "§YThis proposal cannot currently be accepted because the participants or the terms are invalid.§!"
+  pd_ai_will_accept_human:0 "§YPlayer-controlled target. No AI acceptance preview is available.§!"
+  pd_ai_will_accept_yes:0 "§YThey are likely to accept. The overall package looks credible.§!"
+  pd_ai_will_accept_yes_pressure:0 "§YThey are likely to accept. The war is going badly enough that they should bend.§!"
+  pd_ai_will_accept_yes_concessions:0 "§YThey are likely to accept. The proposal returns land they strongly value.§!"
+  pd_ai_will_accept_maybe:0 "§YThey are under pressure, but the deal still asks for meaningful concessions.§!"
+  pd_ai_will_accept_maybe_punitive:0 "§YThey are under pressure, but the punitive terms may still push this too far.§!"
+  pd_ai_will_accept_maybe_land:0 "§YThey are under pressure, but surrendering valued land is still a hard sell.§!"
+  pd_ai_will_accept_no:0 "§YThey are unlikely to accept. The package still asks for too much.§!"
+  pd_ai_will_accept_no_punitive:0 "§YThey are unlikely to accept. The punitive terms are too severe.§!"
+  pd_ai_will_accept_no_land:0 "§YThey are unlikely to accept. The demanded land matters too much to them.§!"
+  
+  pd_receive_take_good:0 "§Y[This.GetName]§! §Gwould receive these states:§!"
+  pd_receive_take_bad:0 "§Y[Root.GetName]§! §Rwould receive these states from§! §Y[This.GetName]§!"
+  
+  pd_receive_puppet_good:0 "§Y[This.GetName]§! §Gwould create a puppet from these states:§!"
+  pd_receive_puppet_bad:0 "§Y[Root.GetName]§! §Rwould create a puppet from these states:§!"
+  
+  pd_receive_demilitarize_good:0 "§Y[Root.GetName]§! §Gwould demilitarize these states:§!"
+  pd_receive_demilitarize_bad:0 "§Y[This.GetName]§! §Rwould be forced to demilitarize these states:§!"
+  
+  pd_receive_liberate_good:0 "§Y[Root.GetName]§! §Gwould return or liberate these states:§!"
+  pd_receive_liberate_bad:0 "§Y[This.GetName]§! §Rwould lose these states through return or liberation:§!"
+  
+  pd_war_reparations_good:0 "§Y[Root.GetName]§! §Gwould pay war reparations to§! §Y[This.GetName]§!"
+  pd_war_reparations_bad:0 "§Y[This.GetName]§! §Rwould pay war reparations to§! §Y[Root.GetName]§!"
+  
+  pd_disarm_good:0 "§Y[Root.GetName]§! §Gwould accept disarmament§!"
+  pd_disarm_bad:0 "§Y[This.GetName]§! §Rwould be forced to disarm§!"
+  
+  # Other
+  pd_waiting_response:0 "Awaiting response"
+  
+  # AI condition names
+  pd_war_pressure:0 "War pressure"
+  pd_peace_terms:0 "Proposal terms"
+  pd_proposal_cost_soft:0 "Proposal cost"
+  pd_geopolitical_situation:0 "Geopolitical constraints"
+  pd_acceptance_stance:0 "AI stance"
