@@ -18,6 +18,189 @@
 
 #### Helper functions
 
+# Computes term score from current proposal arrays and stores in ROOT.pd_cached_term_score
+# Must be called scoped to the receiver (THIS = receiver, ROOT = sender)
+pd_compute_cached_term_score = {
+	set_variable = { ROOT.pd_cached_term_score = 0 }
+
+	if = {
+		limit = {
+			ROOT = { has_country_flag = pd_root_gives }
+		}
+		for_each_scope_loop = {
+			array = ROOT.pd_take_array
+			set_temp_variable = { term_pts = THIS.state_strategic_value }
+			round_temp_variable = term_pts
+			clamp_temp_variable = {
+				var = term_pts
+				min = 2
+				max = 20
+			}
+			if = {
+				limit = {
+					is_core_of = PREV
+				}
+				add_to_temp_variable = { term_pts = 26 }
+			}
+			else_if = {
+				limit = {
+					is_claimed_by = PREV
+				}
+				add_to_temp_variable = { term_pts = 14 }
+			}
+			else = {
+				set_temp_variable = { term_pts = 5 }
+			}
+			add_to_variable = { ROOT.pd_cached_term_score = term_pts }
+		}
+
+		for_each_scope_loop = {
+			array = ROOT.pd_puppet_array
+			add_to_variable = { ROOT.pd_cached_term_score = 4 }
+		}
+
+		for_each_scope_loop = {
+			array = ROOT.pd_liberate_array
+			add_to_variable = { ROOT.pd_cached_term_score = 4 }
+		}
+
+		for_each_scope_loop = {
+			array = ROOT.pd_demilitarize_array
+			set_temp_variable = { term_pts = THIS.state_strategic_value }
+			round_temp_variable = term_pts
+			clamp_temp_variable = {
+				var = term_pts
+				min = 1
+				max = 8
+			}
+			divide_temp_variable = { term_pts = 2 }
+			round_temp_variable = term_pts
+			add_to_temp_variable = { term_pts = 2 }
+			add_to_variable = { ROOT.pd_cached_term_score = term_pts }
+		}
+
+		if = {
+			limit = {
+				ROOT = { has_country_flag = pd_war_reparations }
+			}
+			add_to_variable = { ROOT.pd_cached_term_score = 22 }
+		}
+
+		if = {
+			limit = {
+				ROOT = { has_country_flag = pd_disarm }
+			}
+			add_to_variable = { ROOT.pd_cached_term_score = 34 }
+		}
+	}
+	else = {
+		for_each_scope_loop = {
+			array = ROOT.pd_take_array
+			set_temp_variable = { term_pts = THIS.state_strategic_value }
+			round_temp_variable = term_pts
+			clamp_temp_variable = {
+				var = term_pts
+				min = 2
+				max = 20
+			}
+			if = {
+				limit = {
+					is_core_of = PREV
+					NOT = { is_core_of = ROOT }
+				}
+				add_to_temp_variable = { term_pts = 45 }
+			}
+			else_if = {
+				limit = {
+					is_claimed_by = PREV
+					NOT = { is_claimed_by = ROOT }
+					NOT = { is_core_of = ROOT }
+				}
+				add_to_temp_variable = { term_pts = 24 }
+			}
+			else_if = {
+				limit = {
+					is_core_of = ROOT
+				}
+				set_temp_variable = { term_pts = 6 }
+				if = {
+					limit = {
+						is_core_of = PREV
+					}
+					add_to_temp_variable = { term_pts = 6 }
+				}
+			}
+			else_if = {
+				limit = {
+					is_claimed_by = ROOT
+				}
+				set_temp_variable = { term_pts = 7 }
+			}
+			else = {
+				divide_temp_variable = { term_pts = 2 }
+				round_temp_variable = term_pts
+				add_to_temp_variable = { term_pts = 12 }
+			}
+			subtract_from_variable = { ROOT.pd_cached_term_score = term_pts }
+		}
+
+		for_each_scope_loop = {
+			array = ROOT.pd_liberate_array
+			set_temp_variable = { term_pts = THIS.state_strategic_value }
+			round_temp_variable = term_pts
+			clamp_temp_variable = {
+				var = term_pts
+				min = 1
+				max = 10
+			}
+			add_to_temp_variable = { term_pts = 10 }
+			subtract_from_variable = { ROOT.pd_cached_term_score = term_pts }
+		}
+
+		for_each_scope_loop = {
+			array = ROOT.pd_puppet_array
+			set_temp_variable = { term_pts = THIS.state_strategic_value }
+			round_temp_variable = term_pts
+			clamp_temp_variable = {
+				var = term_pts
+				min = 2
+				max = 18
+			}
+			add_to_temp_variable = { term_pts = 28 }
+			subtract_from_variable = { ROOT.pd_cached_term_score = term_pts }
+		}
+
+		for_each_scope_loop = {
+			array = ROOT.pd_demilitarize_array
+			set_temp_variable = { term_pts = THIS.state_strategic_value }
+			round_temp_variable = term_pts
+			clamp_temp_variable = {
+				var = term_pts
+				min = 1
+				max = 10
+			}
+			divide_temp_variable = { term_pts = 2 }
+			round_temp_variable = term_pts
+			add_to_temp_variable = { term_pts = 10 }
+			subtract_from_variable = { ROOT.pd_cached_term_score = term_pts }
+		}
+
+		if = {
+			limit = {
+				ROOT = { has_country_flag = pd_war_reparations }
+			}
+			subtract_from_variable = { ROOT.pd_cached_term_score = 20 }
+		}
+
+		if = {
+			limit = {
+				ROOT = { has_country_flag = pd_disarm }
+			}
+			subtract_from_variable = { ROOT.pd_cached_term_score = 35 }
+		}
+	}
+}
+
 pd_ai_clear_peace_intent = {
 	ROOT = {
 		clr_country_flag = pd_ai_want_peace
@@ -217,6 +400,7 @@ pd_ai_try_take_current_state = {
 	pd_ai_will_take = yes
 
 	var:peace_target = {
+		pd_compute_cached_term_score = yes
 		if = {
 			limit = {
 				NOT = { pd_ai_current_proposal_is_valid = yes }
@@ -233,6 +417,7 @@ pd_ai_try_liberate_current_state = {
 	pd_ai_will_liberate = yes
 
 	var:peace_target = {
+		pd_compute_cached_term_score = yes
 		if = {
 			limit = {
 				NOT = { pd_ai_current_proposal_is_valid = yes }
@@ -249,6 +434,7 @@ pd_ai_try_puppet_current_state = {
 	pd_ai_will_puppet = yes
 
 	var:peace_target = {
+		pd_compute_cached_term_score = yes
 		if = {
 			limit = {
 				NOT = { pd_ai_current_proposal_is_valid = yes }
@@ -304,6 +490,7 @@ pd_ai_try_war_reparations = {
 			}
 		}
 		pd_ai_enable_war_reparations = yes
+		pd_compute_cached_term_score = yes
 		if = {
 			limit = {
 				NOT = { pd_ai_current_proposal_is_valid = yes }
@@ -345,6 +532,7 @@ pd_ai_try_disarm = {
 			ROOT = { NOT = { has_country_flag = pd_disarm } }
 		}
 		pd_ai_enable_disarm = yes
+		pd_compute_cached_term_score = yes
 		if = {
 			limit = {
 				NOT = { pd_ai_current_proposal_is_valid = yes }
@@ -367,6 +555,7 @@ pd_ai_prepare_peace_deal = {
 	}
 	else = {
 		set_temp_variable = { peace_target = THIS }
+		set_variable = { ROOT.pd_deal_target = THIS }
 		pd_ai_calculate_peace_scores = yes
 
 		if = {

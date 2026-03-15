@@ -1,9 +1,9 @@
 scripted_gui = {
 	
-	pd_hiden_mark = {
+	pd_hidden_mark = {
 		context_type = selected_state_context
 
-		window_name = "pd_hiden_mark"
+		window_name = "pd_hidden_mark"
 
 		visible = {
 			set_temp_variable = { this_state = FROM.FROM }
@@ -17,7 +17,7 @@ scripted_gui = {
 		}
 
 		effects = {
-			pd_hiden_mark_btn_click = {
+			pd_hidden_mark_btn_click = {
 				set_temp_variable = { this_state = FROM.FROM }
 				if = {
 					limit = {
@@ -47,11 +47,12 @@ scripted_gui = {
 				else = {
 					add_state_to_list = yes
 				}
+				var:ROOT.pd_deal_target = { pd_compute_cached_term_score = yes }
 			}
 		}
 		
 		triggers = {
-			pd_hiden_mark_btn_click_enabled = {
+			pd_hidden_mark_btn_click_enabled = {
 				ROOT = {
 					NOT = { has_country_flag = pd_waiting_response }
 					is_ai = no
